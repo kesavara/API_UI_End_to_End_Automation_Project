@@ -2,12 +2,12 @@
 
 Tech Stack :
 	> c#
-	> RestSharp
-	> Specflow
-	> Selenium Webdriver
+	> RestSharp  for API
+	> Specflow - BDD
+	> Selenium Webdriver  for UI
 	> Nunit test framework
 
-WORSPACE = GameTwistAssignment 
+WORKSPACE = GameTwistAssignment/
 
 
 Test:
@@ -20,7 +20,7 @@ Feature File - GameTwistPurchaseFeature.feature
 				3.	GET Consent-v1
 				4.	POST UpgradeToFullRegistration-v1
 				5.	POST Purchase-v1
-		> After successful endpoints call, can make a purchase .
+		> After successful endpoints call, we would get a payment redirect url where we can make a purchase .
 
 Step-Definition File - GameTwistPurchase_End_To_End_TestStep.cs under 'Steps' directory
 

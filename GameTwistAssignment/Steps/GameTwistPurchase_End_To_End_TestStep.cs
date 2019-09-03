@@ -32,7 +32,6 @@ namespace GameTwistAssignment.Steps
         }
         private  IWebElement WaitUntilElementClickable(SeleniumContext seleniumContext, By elementLocator, int timeout = 10)
         {
-
             try
             {
                 var wait = new WebDriverWait(seleniumContext.WebDriver, TimeSpan.FromSeconds(timeout));
@@ -69,7 +68,6 @@ namespace GameTwistAssignment.Steps
         {
             int StatusCode = (int)_settings.Response.StatusCode;
             Assert.AreEqual(200, StatusCode, "Post login failed");
-            
             //using JWTAuthenticator for setting authorization token for the subsequent api calls
             var jwtAuth = new JwtAuthenticator(acctoken.ToString());
             _settings.RestClient.Authenticator = jwtAuth;
@@ -195,10 +193,8 @@ namespace GameTwistAssignment.Steps
         public void WhenSelectBankAustriaFromProviderDropdownAndClickContinue()
         {
             seleniumContext.WebDriver.FindElement(By.XPath("(//input[@title='Bank Austria'])")).Click();
-
             By webElement2 = By.Id("gebForm:verf_ID");
             WaitUntilElementClickable(seleniumContext, webElement2, 10);
-
             var step3PageTitle = seleniumContext.WebDriver.Title;
             var expectedStep3Title = "Unicredit Login e-PS";
             Assert.AreEqual(expectedStep3Title, step3PageTitle, "You are not on the correct page to login to onlinebanking for making payment");
@@ -210,7 +206,6 @@ namespace GameTwistAssignment.Steps
             seleniumContext.WebDriver.FindElement(By.Id("gebForm:verf_ID")).SendKeys("12345");
             seleniumContext.WebDriver.FindElement(By.Id("gebForm:pin_ID")).SendKeys("54321");
             seleniumContext.WebDriver.FindElement(By.Id("gebForm:LoginCommandButton")).Click();
-
             By webElement3 = By.Id("gebForm:j_id127");
             WaitUntilElementClickable(seleniumContext, webElement3, 10);
 
@@ -227,7 +222,6 @@ namespace GameTwistAssignment.Steps
         {
             seleniumContext.WebDriver.FindElement(By.Id("gebForm:j_id75")).Click();
             Thread.Sleep(5000);
-
             var Home3PageTitle = seleniumContext.WebDriver.Title;
             var expectedHomePageTitle = "Play FREE Online Casino games | GameTwist Casino";
             Assert.AreEqual(expectedHomePageTitle, Home3PageTitle, "You are not redirected to Home Page");
@@ -236,7 +230,6 @@ namespace GameTwistAssignment.Steps
         [Then(@"take a screenshot and close the browser")]
         public void ThenTakeAScreenshotAndCloseTheBrowser()
         {
-            
             ((ITakesScreenshot)seleniumContext.WebDriver).GetScreenshot().SaveAsFile(@"..\ScreenShorts_Report", ScreenshotImageFormat.Png);
             // Screenshot is saved in current directory (\GameTwistAssignment\bin\Debug\) .File name as "ScreenShorts_Report"
         }

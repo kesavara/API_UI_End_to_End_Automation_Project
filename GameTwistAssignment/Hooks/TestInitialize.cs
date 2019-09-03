@@ -18,7 +18,6 @@ namespace GameTwistAssignment.Hooks
         private Settings _settings;
         
 
-
         public TestInitialize(Settings settings)
         {
             _settings = settings;
@@ -29,7 +28,6 @@ namespace GameTwistAssignment.Hooks
         public void TestSetup()
         {
             var base_url = "https://www.gametwist.com/nrgs/en/api/";
-            // _settings.BaseUrl = new Uri(ConfigurationManager.AppSettings["baseUrl"].ToString());
             _settings.BaseUrl = new Uri(base_url);
             _settings.RestClient.BaseUrl = _settings.BaseUrl;
            
