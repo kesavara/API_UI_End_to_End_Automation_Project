@@ -1,6 +1,7 @@
 ﻿GreenTube_QA_Assignment :
 
 Tech Stack :
+
 	> c#
 	> RestSharp  for API
 	> Specflow - BDD
@@ -13,6 +14,7 @@ WORKSPACE = GameTwistAssignment/
 Test:
 
 Feature File - GameTwistPurchaseFeature.feature
+
         > End to End Test is captured here
 		> The following endpoints are called in order to make a Purchase:
 				1.	POST Login-v1
