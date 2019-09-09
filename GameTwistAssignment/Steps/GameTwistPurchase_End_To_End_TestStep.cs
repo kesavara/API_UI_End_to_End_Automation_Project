@@ -8,26 +8,23 @@ using System;
 using System.Threading;
 using TechTalk.SpecFlow;
 using OpenQA.Selenium.Support.UI;
+using GameTwistAssignment.Hooks;
 
 namespace GameTwistAssignment.Steps 
 {
     [Binding]
     public class GameTwist_End_To_End_Steps 
     {
-        enum consentType
-        {
-            GeneralTermsAndConditions,
-            DataPrivacyPolicy,
-            MarketingProfiling
-        }
         private string acctoken;
         private Settings _settings;
         private SeleniumContext seleniumContext;
-      
-        public GameTwist_End_To_End_Steps(Settings settings, SeleniumContext _seleniumContext)
+        private CommonRequest commonRequest;
+
+        public GameTwist_End_To_End_Steps(Settings settings, SeleniumContext _seleniumContext,CommonRequest _commonRequest)
         {
             _settings = settings;
             seleniumContext = _seleniumContext;
+            commonRequest = _commonRequest;
         
         }
         private  IWebElement WaitUntilElementClickable(SeleniumContext seleniumContext, By elementLocator, int timeout = 10)
@@ -47,9 +44,7 @@ namespace GameTwistAssignment.Steps
         [Given(@"we perform a post operation for login to authenticate the user")]
         public void GivenWePerformAPostOperationForLoginToAuthenticateTheUser()
         {
-            _settings.Request = new RestRequest("login-v1", Method.POST);
-            _settings.Request.AddHeader("Content-type", "application/json");
-            _settings.Request.RequestFormat = DataFormat.Json;
+            commonRequest.Post_Request("login-v1");
             _settings.Request.AddJsonBody(new
             {
                 nickname = "Testuser123",
@@ -57,7 +52,6 @@ namespace GameTwistAssignment.Steps
                 autologin = true
             });
             _settings.Response = _settings.RestClient.Execute<ResponseClass>(_settings.Request);
-
             var Content = _settings.Response.Content;
             acctoken = _settings.Response.Headers[3].Value.ToString();
 
@@ -76,10 +70,7 @@ namespace GameTwistAssignment.Steps
         [Then(@"we perform a post for consent api so the player changes the acceptance status for type")]
         public void ThenWePerformAPostForConsentApiSoThePlayerChangesTheAcceptanceStatusForType()
         {
-            string url2 = "consent/consent-v1";
-            _settings.Request = new RestRequest(url2, Method.POST);
-            _settings.Request.AddQueryParameter("consentType", consentType.GeneralTermsAndConditions.ToString());
-            _settings.Request.AddQueryParameter("accepted", "true");
+            commonRequest.Post_Request_With_QueryParams("consent/consent-v1");
             _settings.Response = _settings.RestClient.Execute(_settings.Request);
         }
 
@@ -93,8 +84,7 @@ namespace GameTwistAssignment.Steps
         [When(@"we perform a get operation to consent api")]
         public void WhenWePerformAGetOperationToConsentApi()
         {
-            _settings.Request = new RestRequest("consent/consent-v1", Method.GET);
-            _settings.Request.AddQueryParameter("consentType", consentType.GeneralTermsAndConditions.ToString());
+            commonRequest.Get_Request_With_QueryParams("consent/consent-v1");
             _settings.Response = _settings.RestClient.Execute(_settings.Request);
         }
 
@@ -108,9 +98,7 @@ namespace GameTwistAssignment.Steps
         [Then(@"we perform a post call to upgradeToFullRegistration api to become fully registered player")]
         public void ThenWePerformAPostCallToUpgradeToFullRegistrationApiToBecomeFullyRegisteredPlayer()
         {
-            _settings.Request = new RestRequest("player/upgradeToFullRegistration-v1", Method.POST);
-            _settings.Request.AddHeader("Content-type", "application/json");
-            _settings.Request.RequestFormat = DataFormat.Json;
+            commonRequest.Post_Request("player/upgradeToFullRegistration-v1");
             _settings.Request.AddJsonBody(new
             {
                 firstName = "kesav",
@@ -141,11 +129,7 @@ namespace GameTwistAssignment.Steps
         {
             _settings.BaseUrl = new Uri("https://payments-api-v1-at.greentube.com/gametwist.widgets.web.site/en/api/");
             _settings.RestClient.BaseUrl = _settings.BaseUrl;
-
-            _settings.Request = new RestRequest("purchase-v1", Method.POST);
-            _settings.Request.AddHeader("Content-type", "application/json");
-            // _settings.Request.AddHeader("Authoriza")
-            _settings.Request.RequestFormat = DataFormat.Json;
+            commonRequest.Post_Request("purchase-v1");
             _settings.Request.AddJsonBody(new
             {
                 item = "m",
