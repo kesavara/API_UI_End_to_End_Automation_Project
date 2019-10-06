@@ -2,13 +2,15 @@
 using GameTwistAssignment.Utilities;
 using NUnit.Framework;
 using OpenQA.Selenium;
-using RestSharp;
 using RestSharp.Authenticators;
 using System;
 using System.Threading;
 using TechTalk.SpecFlow;
 using OpenQA.Selenium.Support.UI;
 using GameTwistAssignment.Hooks;
+using System.IO;
+using Newtonsoft.Json;
+using GameTwistAssignment.Dto;
 
 namespace GameTwistAssignment.Steps 
 {
@@ -19,12 +21,15 @@ namespace GameTwistAssignment.Steps
         private Settings _settings;
         private SeleniumContext seleniumContext;
         private CommonRequest commonRequest;
+        private SeleniumCommonPg seleniumCommonPg;
+        private string paymentUrl = "https://payments-api-v1-at.greentube.com/gametwist.widgets.web.site/en/api/";
 
-        public GameTwist_End_To_End_Steps(Settings settings, SeleniumContext _seleniumContext,CommonRequest _commonRequest)
+        public GameTwist_End_To_End_Steps(Settings settings, SeleniumContext _seleniumContext,CommonRequest _commonRequest,SeleniumCommonPg _seleniumCommonPg)
         {
             _settings = settings;
             seleniumContext = _seleniumContext;
             commonRequest = _commonRequest;
+            seleniumCommonPg = _seleniumCommonPg;
         
         }
         private  IWebElement WaitUntilElementClickable(SeleniumContext seleniumContext, By elementLocator, int timeout = 10)
@@ -45,12 +50,9 @@ namespace GameTwistAssignment.Steps
         public void GivenWePerformAPostOperationForLoginToAuthenticateTheUser()
         {
             commonRequest.Post_Request("login-v1");
-            _settings.Request.AddJsonBody(new
-            {
-                nickname = "Testuser123",
-                password = "Testing123!",
-                autologin = true
-            });
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName+ "\\Data\\loginRequest.json";
+            LoginRequestModel loginJsonBody = JsonConvert.DeserializeObject<LoginRequestModel>(File.ReadAllText(filePath));
+            _settings.Request.AddJsonBody(loginJsonBody);
             _settings.Response = _settings.RestClient.Execute<ResponseClass>(_settings.Request);
             var Content = _settings.Response.Content;
             acctoken = _settings.Response.Headers[3].Value.ToString();
@@ -99,20 +101,9 @@ namespace GameTwistAssignment.Steps
         public void ThenWePerformAPostCallToUpgradeToFullRegistrationApiToBecomeFullyRegisteredPlayer()
         {
             commonRequest.Post_Request("player/upgradeToFullRegistration-v1");
-            _settings.Request.AddJsonBody(new
-            {
-                firstName = "kesav",
-                lastName = "sdfs",
-                isMale = true,
-                countryCode = "AT",
-                city = "Vienna",
-                zip = "1050",
-                street = "Wiedner Hauptstraße 94",
-                phonePrefix = 43,
-                phoneNumber = "12345678",
-                securityQuestionTag = "squestion_name_of_first_pet",
-                securityAnswer = "dog"
-            });
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName + "\\Data\\fullRegistrationRequest.json";
+            FullRegistrationRequestModel fullRegistrationJsonBody = JsonConvert.DeserializeObject<FullRegistrationRequestModel>(File.ReadAllText(filePath));
+            _settings.Request.AddJsonBody(fullRegistrationJsonBody);
             _settings.Response = _settings.RestClient.Execute(_settings.Request);
         }
 
@@ -127,7 +118,7 @@ namespace GameTwistAssignment.Steps
         [Then(@"finally to perform an item purchase we make post call purchase api")]
         public void ThenFinallyToPerformAnItemPurchaseWeMakePostCallPurchaseApi()
         {
-            _settings.BaseUrl = new Uri("https://payments-api-v1-at.greentube.com/gametwist.widgets.web.site/en/api/");
+            _settings.BaseUrl = new Uri(paymentUrl);
             _settings.RestClient.BaseUrl = _settings.BaseUrl;
             commonRequest.Post_Request("purchase-v1");
             _settings.Request.AddJsonBody(new
@@ -152,10 +143,8 @@ namespace GameTwistAssignment.Steps
         [Then(@"we launch a browser using the paymentRedirectUrl")]
         public void ThenWeLaunchABrowserUsingThePaymentRedirectUrl()
         {
-            //seleniumContext = new SeleniumContext();
             seleniumContext.WebDriver.Manage().Window.Maximize();
-            seleniumContext.WebDriver.Navigate().GoToUrl(_settings.Response.DeserializeResponse()["paymentRedirectUrl"]);
-
+            seleniumCommonPg.NavigateToUrl(_settings.Response.DeserializeResponse()["paymentRedirectUrl"]);
             By webElement1 = By.CssSelector("#nrgs-paymentRedirect-redirect > span");
             WaitUntilElementClickable(seleniumContext, webElement1, 20);
             var step1title = seleniumContext.WebDriver.Title.ToLower();
@@ -167,7 +156,7 @@ namespace GameTwistAssignment.Steps
         [When(@"page is loaded click on next button that takes to payment provider")]
         public void WhenPageIsLoadedClickOnNextButtonThatTakesToPaymentProvider()
         {
-            seleniumContext.WebDriver.FindElement(By.CssSelector("#nrgs-paymentRedirect-redirect > span")).Click();
+            seleniumCommonPg.ClickElementByCss("#nrgs-paymentRedirect-redirect > span");
             var step2PageTitle = seleniumContext.WebDriver.Title;
             var expectedStep2Title = "Step 2: Enter your Payment Details";
             Assert.AreEqual(expectedStep2Title, step2PageTitle, "You are not on the correct page to select bank for making payment");
@@ -176,7 +165,7 @@ namespace GameTwistAssignment.Steps
         [When(@"select bank austria from provider dropdown and click continue")]
         public void WhenSelectBankAustriaFromProviderDropdownAndClickContinue()
         {
-            seleniumContext.WebDriver.FindElement(By.XPath("(//input[@title='Bank Austria'])")).Click();
+            seleniumCommonPg.ClickElementByXpath("(//input[@title='Bank Austria'])");
             By webElement2 = By.Id("gebForm:verf_ID");
             WaitUntilElementClickable(seleniumContext, webElement2, 10);
             var step3PageTitle = seleniumContext.WebDriver.Title;
@@ -187,16 +176,16 @@ namespace GameTwistAssignment.Steps
         [When(@"adding random values to the two input boxes and click the login button and you should see a failure")]
         public void WhenAddingRandomValuesToTheTwoInputBoxesAndClickTheLoginButtonAndYouShouldSeeAFailure()
         {
-            seleniumContext.WebDriver.FindElement(By.Id("gebForm:verf_ID")).SendKeys("12345");
-            seleniumContext.WebDriver.FindElement(By.Id("gebForm:pin_ID")).SendKeys("54321");
-            seleniumContext.WebDriver.FindElement(By.Id("gebForm:LoginCommandButton")).Click();
+            seleniumCommonPg.InputTextById("gebForm:verf_ID", "12345");
+            seleniumCommonPg.InputTextById("gebForm:pin_ID", "54321");
+            seleniumCommonPg.ClickElementById("gebForm:LoginCommandButton");
             By webElement3 = By.Id("gebForm:j_id127");
             WaitUntilElementClickable(seleniumContext, webElement3, 10);
 
-            string FailureLoginText = seleniumContext.WebDriver.FindElement(By.Id("gebForm:j_id127")).Text;
+            string FailureLoginText = seleniumCommonPg.GetTextById("gebForm:j_id127");
             Assert.IsTrue(FailureLoginText.Contains("Es sind Fehler aufgetreten!"), "Failure login message displayed is incorrect");
 
-            string FailureReasonMessage = seleniumContext.WebDriver.FindElement(By.Id("gebForm:j_id129")).Text;
+            string FailureReasonMessage = seleniumCommonPg.GetTextById("gebForm:j_id129");
             Assert.IsTrue(FailureReasonMessage.Contains("Verfüger oder PIN falsch."), "Failure reason message displayed is incorrect");
 
         }
@@ -204,7 +193,7 @@ namespace GameTwistAssignment.Steps
         [When(@"click the cancel button to get redirected back to the gametwist page")]
         public void WhenClickTheCancelButtonToGetRedirectedBackToTheGametwistPage()
         {
-            seleniumContext.WebDriver.FindElement(By.Id("gebForm:j_id75")).Click();
+            seleniumCommonPg.ClickElementById("gebForm:j_id75");
             Thread.Sleep(5000);
             var Home3PageTitle = seleniumContext.WebDriver.Title;
             var expectedHomePageTitle = "Play FREE Online Casino games | GameTwist Casino";
@@ -218,8 +207,6 @@ namespace GameTwistAssignment.Steps
             // Screenshot is saved in current directory (\GameTwistAssignment\bin\Debug\) .File name as "ScreenShorts_Report"
         }
        
-
-      
     }
 
 }

@@ -1,0 +1,13 @@
+{
+  "firstName" : "kesav",
+  "lastName" : "sdfs",
+  "isMale" : true,
+  "countryCode" : "AT",
+  "city" : "Vienna",
+  "zip" : "1050",
+  "street":"Wiedner Hauptstraﬂe 94",
+  "phonePrefix": "43",
+  "phoneNumber" : "12345678",
+  "securityQuestionTag" : "squestion_name_of_first_pet",
+  "securityAnswer" : "dog"
+}
