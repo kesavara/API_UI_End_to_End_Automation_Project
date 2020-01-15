@@ -1,4 +1,4 @@
-﻿GreenTube_QA_Assignment :
+﻿API_UI_End_toEnd_Automation :
 
 Tech Stack :
 
@@ -8,7 +8,7 @@ Tech Stack :
 	> Selenium Webdriver  for UI
 	> Nunit test framework
 
-WORKSPACE = GameTwistAssignment/
+WORKSPACE = GameTwist/
 
 
 Test:
