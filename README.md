@@ -1,7 +1,5 @@
-# GreenTube_QA_Assignment_API_UI_Test
-End To End Test -  API and UI Automation
+#End To End Test -  API and UI Automation
 
-GreenTube_QA_Assignment :
 
 Tech Stack :
 
@@ -10,7 +8,7 @@ Tech Stack :
 > Specflow - BDD
 > Selenium Webdriver  for UI
 > Nunit test framework
-WORKSPACE = GameTwistAssignment/
+WORKSPACE = GameTwist/
 
 Test:
 
